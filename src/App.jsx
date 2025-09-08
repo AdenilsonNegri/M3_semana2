@@ -4,6 +4,7 @@ import EnvioForm from "./pages/Envios/EnvioForm/EnvioForm";
 import EnvioList from "./pages/Envios/EnviosList/EnviosList";
 import CadastroProduto from "./CadastroProduto.jsx";
 import './App.css'
+import ProductList from "./components/ProductList.jsx";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Route path="/envio/novo" Component={EnvioForm} />
       <Route path="/envios/editar/:id" Component={EnvioForm} />
       <Route path="/CadastroProduto" Component={CadastroProduto} />
+      <Route path="/produtos" Component={ProductList} />
     </Routes>
   );
 }
