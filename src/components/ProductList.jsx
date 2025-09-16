@@ -5,6 +5,7 @@ const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   // Simulando uma API (substitua pela URL real da sua API)
   const API_URL = 'http://localhost:3001/produtos'; 
@@ -49,6 +50,150 @@ const ProductList = () => {
     }
   };
 
+  // Função para editar um produto
+  const handleEdit = (product) => {
+    setEditingProduct({ ...product}); // Cria uma cópia para evitar mutações diretas
+  };
+
+  // Função para salvar as alterações do produto editado
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.put(`${API_URL}/${editingProduct.id}`, editingProduct);
+
+      // Atualiza a lista localmente (substitui o produto editado)
+      setProducts(prev =>
+        prev.map(p => p.id === editingProduct.id ? response.data : p)
+      );
+
+      setEditingProduct(null); // Sai do modo de edição
+
+      alert('Produto atualizado com sucesso!');
+    } catch (err) {
+      setError('Erro ao atualizar produto. Tente novamente.');
+      console.error("Erro ao atualizar:", err);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingProduct(null); // Cancela a edição e sai do modo de edição
+  };
+
+  if (editingProduct) {
+    return (
+      <div style={{ padding: '20px' }}>
+        <h2>Editando Produto</h2>
+        <button
+         onClick={handleCancelEdit}
+          style={{
+             marginBottom: '20px',
+             backgroundColor: '#6c757d',
+              color: 'white',
+              padding: '8px 16px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+          }}
+        >
+          Voltar
+        </button>
+
+        <form onSubmit={handleSaveEdit}>
+          <div style={{ marginBottom: '15px' }}>
+            <label>Nome:</label>
+            <input
+              type="text"
+              value={editingProduct.nome}
+              onChange={(e) => setEditingProduct({ ...editingProduct, nome: e.target.value })}
+              required
+              style={{
+                width: '100%',
+                padding: '8px',
+                marginTop: '5px',
+              }}
+            />
+
+          </div>
+          <div style={{ marginBottom: '15px' }}>
+            <label>Preço:</label>
+            <input
+              type="number"
+              value={editingProduct.preco}
+              onChange={(e) => setEditingProduct({ ...editingProduct, preco: parseFloat(e.target.value) })}
+              required
+              style={{
+                width: '100%',
+                padding: '8px',
+                marginTop: '5px',
+              }}
+            />
+          </div>
+          <div style={{ marginBottom: '15px' }}>
+            <label>Descrição:</label>
+            <textarea
+              value={editingProduct.descricao}
+              onChange={(e) => setEditingProduct({ ...editingProduct, descricao: e.target.value })}
+              required
+              style={{
+                width: '100%',
+                padding: '8px',
+                height: '100px',
+                marginTop: '5px',
+              }}
+            />
+              
+          </div>
+          <div style={{ marginBottom: '15px' }}>
+            <label>URL da Imagem:</label>
+            <input
+              type="text"
+              value={editingProduct.imagem || ''}
+              onChange={(e) => setEditingProduct({ ...editingProduct, imagem: e.target.value })}
+              style={{
+                width: '100%',
+                padding: '8px',
+                marginTop: '5px',
+              }}
+            />
+          </div>
+
+           <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              type="submit"
+              style={{
+                backgroundColor: '#28a745',
+                color: 'white',
+                padding: '10px 20px',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                flex: 1,
+              }}
+            >
+              Salvar
+            </button>
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              style={{
+                backgroundColor: '#6c757d',
+                color: 'white',
+                padding: '10px 20px',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                flex: 1,
+              }}
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+  
+// Renderiza a lista de produtos
   if (loading) {
     return <div>Carregando produtos...</div>;
   }
@@ -133,6 +278,7 @@ const ProductList = () => {
                   cursor: 'pointer',
                   flex: 1,
                 }}
+                onClick={() => handleEdit(product)}
               >
                 Editar
               </button>
