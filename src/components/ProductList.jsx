@@ -25,6 +25,30 @@ const ProductList = () => {
     fetchProducts();
   }, []);
 
+  // Função para deletar um produto
+  const handleDelete = async (id, nome) => {
+    // Mostra confirmação
+    if (!window.confirm("Tem certeza que deseja excluir?")) {
+      return; // Cancela se o usuário clicar em "Cancelar"
+    }
+
+    try {
+      // Envia requisição DELETE
+      await axios.delete(`${API_URL}/${id}`);
+      
+      // Atualiza a lista localmente (remove o produto excluído)
+      setProducts(prevProducts => prevProducts.filter(product => product.id !== id));
+      
+      // Opcional: você pode mostrar uma mensagem de sucesso
+      console.log(`Produto "${nome}" excluído com sucesso!`);
+    } catch (err) {
+      setError('Erro ao excluir produto. Tente novamente.');
+      console.error("Erro ao excluir:", err);
+      // Opcional: recarregar a lista em caso de erro
+      // fetchProducts();
+    }
+  };
+
   if (loading) {
     return <div>Carregando produtos...</div>;
   }
@@ -71,13 +95,19 @@ const ProductList = () => {
             onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
             <img
-              src={product.image || 'https://placehold.co/60x60?text=Produto'} // Imagem padrão se não houver
-              alt={product.name}
+              src={
+                product.imagem?.trim() || 
+                `https://picsum.photos/seed/${product.id}/60/60`
+              }
+              alt={product.nome}
+              onError={(e) => {
+                e.target.src = `https://placehold.co/60x60?text=${product.nome.split(' ').slice(0, 2).join(' ')}`;
+              }}
               style={{ width: '60px', height: '60px', marginBottom: '10px' }}
             />
-            <h3>{product.name} - R$ {(product.price ?? 0).toFixed(2)}</h3>
+            <h3>{product.nome} - R$ {(product.preco ?? 0).toFixed(2)}</h3>
             <p style={{ fontSize: '14px', color: '#555' }}>
-              {product.description}
+              {product.descricao}
             </p>
             <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
               <button
@@ -89,6 +119,7 @@ const ProductList = () => {
                   cursor: 'pointer',
                   flex: 1,
                 }}
+                onClick={() => handleDelete(product.id, product.nome)}
               >
                 Deletar
               </button>
