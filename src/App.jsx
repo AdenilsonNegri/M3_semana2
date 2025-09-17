@@ -9,7 +9,7 @@ import ProductList from "./components/ProductList.jsx";
 function App() {
   return (
     <Routes>
-      <Route path="/" Component={EnvioList} />
+      <Route path="/" Component={ProductList} />
       <Route path="/envio/novo" Component={EnvioForm} />
       <Route path="/envios/editar/:id" Component={EnvioForm} />
       <Route path="/CadastroProduto" Component={CadastroProduto} />

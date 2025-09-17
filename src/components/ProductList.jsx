@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
+
+  const navigate = useNavigate();
 
   // Simulando uma API (substitua pela URL real da sua API)
   const API_URL = 'http://localhost:3001/produtos'; 
@@ -25,6 +30,18 @@ const ProductList = () => {
 
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    if (!searchTerm.trim) {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter(product =>
+        product.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        product.descricao.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    }
+  }, [searchTerm, products]);
 
   // Função para deletar um produto
   const handleDelete = async (id, nome) => {
@@ -202,21 +219,78 @@ const ProductList = () => {
     return <div style={{ color: 'red' }}>{error}</div>;
   }
 
+// Função para navegar até o formulário de cadastro
+const handleCreateNew = () => {
+  navigate('/CadastroProduto');
+}  
   return (
     <div>
       <header>
         <h1>Produtos cadastrados</h1>
-        <button style={{
-          backgroundColor: '#4285f5',
-          color: 'white',
-          padding: '8px 16px',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          float: 'right'
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '15px',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
         }}>
+          {/* Campo de pesquisa */}
+          <div style={{
+            flex: '1',
+            minWidth: '200px',
+            position: 'relative',
+          }}>
+            <input
+              type="text"
+              placeholder="Pesquisar produtos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: '90%',
+                padding: '10px 15px',
+                borderRadius: '4px',
+                border: '1px solid #ddd',
+                fontSize: '16px',
+                paddingLeft: '40px',
+              }}
+            />
+              <svg
+                style={{
+                  position: 'absolute',
+                  left: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: '20px',
+                  height: '20px',
+                  color: '#666',
+                }}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+          </div>
+
+          {/* Botão para criar um novo produto */}
+          <button
+          onClick={handleCreateNew}
+            style={{
+              backgroundColor: '#4285f5',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'              
+            }}>
+            
           Novo
         </button>
+        </div>
       </header>
 
       <div style={{
@@ -226,7 +300,8 @@ const ProductList = () => {
         marginTop: '20px',
         padding: '0 20px'
       }}>
-        {products.map((product) => (
+      {filteredProducts.length > 0 ? (
+        filteredProducts.map((product) => (
           <div
             key={product.id}
             style={{
@@ -284,7 +359,17 @@ const ProductList = () => {
               </button>
             </div>
           </div>
-        ))}
+        ))      
+      ) : (
+        <div style={{
+          gridColumn: '1 / -1',
+          textAlign: 'center',
+          padding: '40px',
+          color: '#666'
+        }}>
+          Nenhum produto encontrado.
+        </div>
+      )}       
       </div>
     </div>
   );
